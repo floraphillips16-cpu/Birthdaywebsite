@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! 🎂</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 2026 GLOBAL DESIGN SYSTEM & VARIABLES */
+        :root {
+            --bg-color: #050505;
+            --text-main: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --accent-1: #ff2e93;
+            --accent-2: #00f0ff;
+            --accent-3: #7000ff;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font-sans: 'Outfit', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Custom cursor used */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 46, 147, 0.08), transparent 25%);
+            background-attachment: fixed;
+            scroll-behavior: smooth;
+        }
+
+        /* CUSTOM CURSOR */
+        .cursor-dot, .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-2);
+            box-shadow: 0 0 10px var(--accent-2);
+        }
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+
+        /* LOADING SCREEN */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10000;
+            transition: opacity 1s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+        .loader-text {
+            font-size: 1.5rem;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            font-weight: 300;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; filter: blur(2px); }
+            100% { opacity: 1; filter: blur(0px); }
+        }
+
+        /* BACKGROUND MESH GRADIENT BLOBS */
+        .blob {
+            position: fixed;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+        }
+        .blob-1 { width: 400px; height: 400px; background: var(--accent-1); top: -10%; left: -10%; animation-delay: 0s; }
+        .blob-2 { width: 300px; height: 300px; background: var(--accent-2); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .blob-3 { width: 350px; height: 350px; background: var(--accent-3); top: 40%; left: 40%; animation-delay: -10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* HERO SECTION */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+        .hero-subtitle {
+            font-family: var(--font-serif);
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s forwards 1.5s;
+        }
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #fff, var(--accent-2), var(--accent-1));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s forwards 1.8s;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            animation: fadeUp 1s forwards 2.5s;
+        }
+        .mouse {
+            width: 24px;
+            height: 36px;
+            border: 2px solid var(--text-muted);
+            border-radius: 12px;
+            position: relative;
+        }
+        .wheel {
+            width: 4px;
+            height: 8px;
+            background: var(--accent-2);
+            border-radius: 2px;
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scrollWheel 2s infinite;
+        }
+
+        @keyframes scrollWheel {
+            0% { top: 4px; opacity: 1; }
+            100% { top: 20px; opacity: 0; }
+        }
+
+        /* STORY / JOURNEY SECTIONS */
+        .story-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 10vh 2rem;
+        }
+        .story-step {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10vh;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .story-step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        /* Glow inside card */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+        
+        .step-number {
+            font-family: var(--font-serif);
+            font-size: 6rem;
+            font-weight: 600;
+            font-style: italic;
+            color: rgba(255,255,255,0.05);
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            pointer-events: none;
+        }
+        .step-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+        .step-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            max-width: 600px;
+        }
+        .align-right { justify-content: flex-end; text-align: right; }
+        .align-right .step-number { right: auto; left: 20px; }
+        .align-right .step-text { margin-left: auto; }
+
+        /* INTERACTIVE FINALE / GIFT */
+        .finale-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        .gift-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: #fff;
+            border: none;
+            padding: 1.5rem 3rem;
+            font-size: 1.5rem;
+            font-family: var(--font-sans);
+            font-weight: 700;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(255, 46, 147, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+        .gift-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            transition: all 0.5s ease;
+        }
+        .gift-btn:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 46, 147, 0.6);
+        }
+        .gift-btn:hover::after {
+            left: 150%;
+        }
+
+        #final-message {
+            display: none;
+            margin-top: 3rem;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #final-message.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .highlight {
+            color: var(--accent-2);
+            font-weight: bold;
+        }
+
+        /* CONFETTI CANVAS */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* UTILITIES */
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .glass-card { padding: 2rem; }
+            .step-number { font-size: 4rem; }
+            .align-right { text-align: left; justify-content: flex-start; }
+            .align-right .step-text { margin-left: 0; }
+            .align-right .step-number { right: 20px; left: auto; }
+            /* Turn off custom cursor for mobile */
+            .cursor-dot, .cursor-outline { display: none; }
+            * { cursor: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CUSTOM CURSOR -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- BACKGROUND BLOBS -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="loader-text" id="loader-text">Loading Memories...</div>
+    </div>
+
+    <!-- CANVAS FOR CONFETTI -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <h2 class="hero-subtitle">A journey through time, for my best friend</h2>
+        <h1 class="hero-title">Happy Birthday,<br> <span style="color:var(--accent-2)">[Friend's Name]</span></h1>
+        
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Scroll</span>
+        </div>
+    </section>
+
+    <!-- STORY JOURNEY -->
+    <section class="story-container">
+        <!-- Step 1 -->
+        <div class="story-step">
+            <div class="glass-card">
+                <span class="step-number">01</span>
+                <h3 class="step-title">The Beginning</h3>
+                <p class="step-text">From the moment we met, I knew my life was about to get a whole lot louder, weirder, and infinitely better. We've built an empire of inside jokes and unforgettable late-night conversations that I wouldn't trade for the world.</p>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="story-step align-right">
+            <div class="glass-card">
+                <span class="step-number">02</span>
+                <h3 class="step-title">Through the Storms</h3>
+                <p class="step-text">Life hasn't always been a smooth ride, but having you by my side made the heavy days lighter. You are the person I call when things go wrong, and the first person I want to tell when things go right. Thank you for your unwavering loyalty.</p>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="story-step">
+            <div class="glass-card">
+                <span class="step-number">03</span>
+                <h3 class="step-title">More Than a Friend</h3>
+                <p class="step-text">They say friends are the family we choose. Well, I must be a genius because I chose the absolute best. Watching you grow, achieve your goals, and become the incredible person you are today is my greatest privilege.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINALE -->
+    <section class="finale-section">
+        <h3 class="step-title" style="font-size: 3rem; margin-bottom: 0.5rem;">It's Your Day.</h3>
+        <p class="step-text" style="margin-bottom: 2rem;">Make a wish, take a deep breath, and...</p>
+        
+        <button class="gift-btn" id="open-gift-btn">Open Your Gift 🎁</button>
+
+        <div id="final-message">
+            <div class="glass-card" style="max-width: 700px; margin: 0 auto; text-align: center;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--accent-1);">Cheers to Another Year! 🥂</h2>
+                <p style="font-size: 1.2rem; line-height: 1.8; color: var(--text-main);">
+                    May this year bring you as much joy, success, and love as you bring to everyone around you. Keep shining, keep thriving, and never stop being the badass that you are. <br><br>
+                    <span class="highlight">I love you beyond words. Happy Birthday!</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. CUSTOM CURSOR LOGIC
+        const cursorDot = document.getElementById("cursor-dot");
+        const cursorOutline = document.getElementById("cursor-outline");
+        
+        window.addEventListener("mousemove", function (e) {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Adding a slight delay to the outline for a smooth trailing effect
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Interactive hover effect for buttons and cards
+        const hoverElements = document.querySelectorAll('button, .glass-card');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorOutline.style.width = '60px';
+                cursorOutline.style.height = '60px';
+                cursorOutline.style.backgroundColor = 'rgba(0, 240, 255, 0.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorOutline.style.width = '40px';
+                cursorOutline.style.height = '40px';
+                cursorOutline.style.backgroundColor = 'transparent';
+            });
+        });
+
+        // 2. LOADER LOGIC
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            // Simulate a brief loading sequence
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 1000);
+            }, 1500); // 1.5 seconds loading
+        });
+
+        // 3. SCROLL REVEAL ANIMATION (Intersection Observer)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Run once
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.story-step').forEach(step => {
+            observer.observe(step);
+        });
+
+        // 4. CONFETTI & FINALE LOGIC
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#ff2e93', '#00f0ff', '#7000ff', '#ffffff', '#ffaa00'];
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 8 + 4;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * -10 - 5;
+                this.gravity = 0.3;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 10 - 5;
+                this.shape = Math.random() > 0.5 ? 'circle' : 'rect';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+                this.rotation += this.rotationSpeed;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if (this.shape === 'circle') {
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                }
+                ctx.restore();
+            }
+        }
+
+        let animationId;
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                // Remove particles that fall off screen
+                if (particles[i].y > canvas.height) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            if (particles.length > 0) {
+                animationId = requestAnimationFrame(animateConfetti);
+            }
+        }
+
+        function fireConfetti() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 1.2;
+            
+            // Create a burst of 150 particles
+            for (let i = 0; i < 150; i++) {
+                particles.push(new Particle(centerX, centerY));
+            }
+            
+            // Add side bursts
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(canvas.width * 0.2, centerY));
+                particles.push(new Particle(canvas.width * 0.8, centerY));
+            }
+
+            cancelAnimationFrame(animationId);
+            animateConfetti();
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Gift Button Click Event
+        const giftBtn = document.getElementById('open-gift-btn');
+        const finalMessage = document.getElementById('final-message');
+
+        giftBtn.addEventListener('click', () => {
+            // Hide button
+            giftBtn.style.display = 'none';
+            // Show message
+            finalMessage.classList.add('show');
+            // Trigger Confetti
+            fireConfetti();
+            
+            // Optional: trigger secondary confetti bursts every 1.5s
+            let burstCount = 0;
+            const burstInterval = setInterval(() => {
+                fireConfetti();
+                burstCount++;
+                if(burstCount >= 3) clearInterval(burstInterval);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
